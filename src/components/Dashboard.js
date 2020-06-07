@@ -13,16 +13,19 @@ export default class Dashboard extends React.Component {
         this.state = {
             chartOptions: {
                 series: [{
-                    data: [1, 3, 2]
-                }]
+                    data: [100]
+                }],
+                chart: {
+                    type: "solidgauge"
+                }
             }
         };
     }
     render() {
         return (
-            <View>
+            <View style={styles.container}>
                 <HighchartsReactNative
-                    styles={styles.container}
+                    styles={styles.chartContainer}
                     options={this.state.chartOptions}
                     modules={modules}
                 />
@@ -32,9 +35,14 @@ export default class Dashboard extends React.Component {
 }
 const styles = StyleSheet.create({
     container: {
-        // height: 200,
-        // width: 200,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff'
+    },
+    chartContainer: {
+        height: 300,
+        width: 300,
         backgroundColor: '#fff',
-        justifyContent: 'center'
     }
 });
