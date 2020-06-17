@@ -1,48 +1,58 @@
-import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import HighchartsReactNative from '@highcharts/highcharts-react-native';
+import React, { Component } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import FusionCharts from 'react-native-fusioncharts';
 
-const modules = [
-    'highcharts-more',
-    'solid-gauge'
-];
-
-export default class Dashboard extends React.Component {
+export default class Dashboard extends Component {
     constructor(props) {
         super(props);
+        this.apiCaller = null;
         this.state = {
-            chartOptions: {
-                series: [{
-                    data: [100]
-                }],
-                chart: {
-                    type: "solidgauge"
-                }
-            }
+            type: 'angulargauge',
+            width: '100%',
+            height: '100%',
+            dataFormat: 'json',
+            dataSource: '../data.json'
         };
+        this.libraryPath = Platform.select({
+            // Specify fusioncharts.html file location
+            android: { uri: 'file:///android_asset/fusioncharts.html' },
+            ios: require('./assets/fusioncharts.html')
+        });
     }
+
     render() {
         return (
             <View style={styles.container}>
-                <HighchartsReactNative
-                    styles={styles.chartContainer}
-                    options={this.state.chartOptions}
-                    modules={modules}
-                />
-            </View >
+                <Text style={styles.header}>A Simple Gauge</Text>
+                <View style={styles.chartContainer}>
+                    <FusionCharts
+                        type={this.state.type}
+                        width={this.state.width}
+                        height={this.state.height}
+                        dataFormat={this.state.dataFormat}
+                        dataSource={this.state.dataSource}
+                        libraryPath={this.libraryPath}
+                    />
+                </View>
+            </View>
         );
     }
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff'
+        padding: 10
+    },
+    header: {
+        fontWeight: 'bold',
+        fontSize: 20,
+        textAlign: 'center',
+        paddingBottom: 10
     },
     chartContainer: {
-        height: 300,
-        width: 300,
-        backgroundColor: '#fff',
+        height: 400,
+        borderColor: '#000',
+        borderWidth: 1
     }
 });
