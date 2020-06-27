@@ -1,19 +1,31 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, ScrollView, View, Text, StatusBar } from 'react-native';
-import Dashboard from './src/components/Dashboard';
+import { createSwitchNavigator, createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack'
+import Home from './src/components/Dashboard';
+import Login from './src/components/Login';
+import Register from './src/components/Register';
+import Splash from './src/components/Splash';
+import './src/config';
+import firebase from 'firebase';
 
-function App() {
-  return (
-    <>
-      <Dashboard />
-    </>
-  );
-};
+console.disableYellowBox = true;
 
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1
+const Stack = createStackNavigator(
+  {
+    Login,
+    Register,
   },
-});
+)
 
-export default App;
+const Switch = createSwitchNavigator(
+  {
+    Home,
+    Splash,
+    Stack,
+  },
+  {
+    initialRouteName: 'Splash'
+  }
+)
+
+export default createAppContainer(Switch)
