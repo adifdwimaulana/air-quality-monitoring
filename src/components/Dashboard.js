@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import { LineChart } from "react-native-chart-kit";
-import Icon from 'react-native-vector-icons/FontAwesome';
 import SearchableDropdown from 'react-native-searchable-dropdown';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 let dataArr = [88, 50, 79, 120, 78];
 let labelArr = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis"]
@@ -42,7 +42,8 @@ class Dashboard extends React.Component {
             label: null,
             day: '',
             date: '',
-            ispu: null
+            ispu: null,
+            location: null,
         }
     }
 
@@ -65,7 +66,7 @@ class Dashboard extends React.Component {
             >
                 {/* <Text style={styles.title}>Bezier Line Chart</Text> */}
                 <Text style={styles.title}>Informasi Kualitas Udara</Text>
-                <Text style={styles.date}>{day}, {date}</Text>
+                <Text style={styles.date}>{day}, {today}</Text>
                 <View style={styles.chartContainer}>
                     <SearchableDropdown
                         style={styles.searchForm}
@@ -87,7 +88,10 @@ class Dashboard extends React.Component {
                         resetValue={false}
                         underlineColorAndroid="transparent"
                     />
-                    <Text style={styles.ispu}>Index ISPU = 78</Text>
+                    <View style={styles.indicatorWrapper}>
+                        <Text style={styles.ispu}>Index ISPU = 78</Text>
+                        <Text style={styles.status}>Status: Baik</Text>
+                    </View>
                     <LineChart
                         data={{
                             labels: labelArr,
@@ -121,6 +125,43 @@ class Dashboard extends React.Component {
                         bezier
                         style={styles.chart}
                     />
+                </View>
+                <Text style={styles.pollen}>Pollen</Text>
+                <View style={styles.cardContainer}>
+                    <View style={styles.card}>
+                        <View style={styles.topPart}>
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <View style={styles.valueWrapper}>
+                                    <Icon name='thermometer' size={22} color='#fff' style={styles.iconValue} />
+                                    <Text style={styles.value}>Temperature</Text>
+                                </View>
+                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>30C</Text>
+                            </View>
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <View style={styles.valueWrapper}>
+                                    <Icon name='percent' size={22} color='#fff' style={styles.iconValue} />
+                                    <Text style={styles.value}>Humidity</Text>
+                                </View>
+                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>80%</Text>
+                            </View>
+                        </View>
+                        <View style={styles.botPart}>
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <View style={styles.valueWrapper}>
+                                    <Icon name='cloud' size={22} color='#fff' style={styles.iconValue} />
+                                    <Text style={styles.value}>CO2</Text>
+                                </View>
+                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>94 ppb</Text>
+                            </View>
+                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                <View style={styles.valueWrapper}>
+                                    <Icon name='fire' size={22} color='#fff' style={styles.iconValue} />
+                                    <Text style={styles.value}>Nitrogen</Text>
+                                </View>
+                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>943 ppb</Text>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
         )
@@ -157,17 +198,71 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         marginHorizontal: 18
     },
-    ispu: {
+    indicatorWrapper: {
         marginTop: 20,
         marginHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    ispu: {
         fontSize: 24,
         fontWeight: '700',
         color: '#7c807c'
+    },
+    status: {
+        fontSize: 16,
+        color: '#73716b',
+        fontWeight: '600',
+        letterSpacing: 1.2
     },
     chart: {
         marginVertical: 16,
         borderRadius: 16,
         alignItems: 'center',
+    },
+    pollen: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#7c807c',
+        marginHorizontal: 20,
+        marginTop: 8
+    },
+    cardContainer: {
+        justifyContent: 'center',
+        flexDirection: 'row',
+        marginBottom: 30,
+        marginTop: 8
+    },
+    card: {
+        width: Dimensions.get("window").width * 0.94,
+        height: 200,
+        backgroundColor: '#1060e0',
+        borderRadius: 16,
+        marginHorizontal: 'auto'
+    },
+    topPart: {
+        flexDirection: 'row',
+        margin: 20,
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    botPart: {
+        flexDirection: 'row',
+        marginHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    valueWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    value: {
+        fontSize: 16,
+        color: '#fff',
+        fontWeight: '600',
+        // letterSpacing: 1.2,
+        marginLeft: 6
     }
 })
 
