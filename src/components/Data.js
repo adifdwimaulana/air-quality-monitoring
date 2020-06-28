@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert 
 import SearchableDropdown from 'react-native-searchable-dropdown';
 import firebase from 'firebase';
 
-const items = [
+const locations = [
     { id: 1, name: 'Keputih' },
     { id: 2, name: 'Ketintang' },
 ];
@@ -17,17 +17,13 @@ class Data extends React.Component {
         super(props);
 
         this.state = {
-            day: '',
-            matkul: '',
-            start: '',
-            end: '',
-            dosenList: [],
-            dosen: null,
-            ruangan: ''
+            lokasi: null,
+            co2: '',
+            no2: '',
+            temperature: '',
+            humidity: '',
         }
     }
-
-    static navigationOptions = { header: null }
 
     handleSubmit(day, matkul, start, end, dosen, ruangan) {
         let roomUrl = ruangan.id;
@@ -53,27 +49,8 @@ class Data extends React.Component {
             })
     }
 
-    handleRuangan(item) {
+    handleLokasi(item) {
         console.log(item);
-        this.setState({ ruangan: item })
-        let roomId = item.id;
-        let dosenUrl = '/' + roomId + '/dosen';
-        let objectDosen;
-
-        firebase.database().ref(dosenUrl).on('value', (snap) => {
-            dosenArr = [];
-            snap.forEach((item) => {
-                let itemVal = item.val();
-                let itemKey = item.key;
-                objectDosen = {
-                    id: itemVal.id,
-                    name: itemVal.nama
-                }
-
-                dosenArr.push(objectDosen);
-                this.setState({ dosenList: dosenArr });
-            })
-        })
     }
 
     render() {
@@ -84,79 +61,58 @@ class Data extends React.Component {
             <ScrollView
                 keyboardShouldPersistTaps='always'
                 style={styles.container}>
-                <Text style={styles.title}>Input Data Mata Kuiah</Text>
+                <Text style={styles.title}>Input Data Kualitas Udara</Text>
                 <View style={styles.form}>
-                    <Text style={styles.inputTitle}>Mata Kuliah</Text>
+                    <Text style={styles.inputTitle}>Lokasi</Text>
+                    <SearchableDropdown
+                        onTextChange={text => console.log(text)}
+                        onItemSelect={item => this.handleLokasi(item)}
+                        textInputStyle={{
+                            borderBottomColor: "#000",
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                            fontSize: 15
+                        }}
+                        itemStyle={styles.itemStyle}
+                        itemTextStyle={{
+                            color: '#222',
+                        }}
+                        items={locations}
+                        defaultIndex={2}
+                        placeholder="Masukkan Lokasi"
+                        resetValue={false}
+                        underlineColorAndroid="transparent"
+                    />
+                    <Text style={styles.inputTitleCO2}>Kadar CO2</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="Mata Kuliah"
+                        placeholder="87 ppb"
                         onChangeText={matkul => this.setState({ matkul })}
                         value={matkul}
                     />
-                    <Text style={styles.inputTitle}>Hari</Text>
+                    <Text style={styles.inputTitle}>Kadar NO2</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="Senin"
-                        onChangeText={day => this.setState({ day })}
-                        value={day}
-                    />
-                    <Text style={styles.inputTitle}>Jam Mulai</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        autoCapitalize="none"
-                        placeholder="08:00"
+                        placeholder="944 ppb"
                         onChangeText={start => this.setState({ start })}
                         value={start}
                     />
-                    <Text style={styles.inputTitle}>Jam Selesai</Text>
+                    <Text style={styles.inputTitle}>Suhu</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="10:30"
+                        placeholder="29"
                         onChangeText={end => this.setState({ end })}
                         value={end}
                     />
-                    <Text style={styles.inputTitle}>Ruangan</Text>
-                    <SearchableDropdown
-                        onTextChange={text => console.log(text)}
-                        // onItemSelect={item => alert(JSON.stringify(item))}
-                        // onItemSelect={item => this.setState({ ruangan: item })}
-                        onItemSelect={item => this.handleRuangan(item)}
-                        textInputStyle={{
-                            borderBottomColor: "#000",
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                        itemStyle={styles.itemStyle}
-                        itemTextStyle={{
-                            color: '#222',
-                        }}
-                        items={items}
-                        defaultIndex={2}
-                        placeholder="Masukkan Ruangan"
-                        resetValue={false}
-                        underlineColorAndroid="transparent"
-                    />
-                    <Text style={styles.inputTitleDosen}>Dosen</Text>
-                    <SearchableDropdown
-                        onTextChange={text => console.log(text)}
-                        // onItemSelect={item => alert(JSON.stringify(item))}
-                        // onItemSelect={item => console.log(item)}
-                        onItemSelect={item => this.setState({ dosen: item })}
-                        textInputStyle={{
-                            borderBottomColor: "#000",
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                        itemStyle={styles.itemStyle}
-                        itemTextStyle={{
-                            color: '#222',
-                        }}
-                        items={dosenArr}
-                        defaultIndex={2}
-                        placeholder="Input Dosen"
-                        resetValue={false}
-                        underlineColorAndroid="transparent"
+                    <Text style={styles.inputTitle}>Kelembapan</Text>
+                    <TextInput
+                        style={styles.textInputKelembapan}
+                        autoCapitalize="none"
+                        placeholder="77%"
+                        onChangeText={end => this.setState({ end })}
+                        value={end}
                     />
                     <TouchableOpacity
                         style={styles.submitBtn}
@@ -193,7 +149,7 @@ const styles = StyleSheet.create({
         fontSize: 10,
         textTransform: "uppercase"
     },
-    inputTitleDosen: {
+    inputTitleCO2: {
         color: "#000",
         fontSize: 10,
         textTransform: "uppercase",
@@ -205,7 +161,14 @@ const styles = StyleSheet.create({
         height: 40,
         fontSize: 15,
         color: "#161F30",
-        marginBottom: 24
+        marginBottom: 24,
+    },
+    textInputKelembapan: {
+        borderBottomColor: "#000",
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        height: 40,
+        fontSize: 15,
+        color: "#161F30",
     },
     submitBtn: {
         height: 40,
