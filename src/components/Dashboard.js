@@ -3,35 +3,27 @@ import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
 import { LineChart } from "react-native-chart-kit";
 import SearchableDropdown from 'react-native-searchable-dropdown';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Mapview from 'react-native-maps';
+import firebase from 'firebase';
 
 let dataArr = [88, 50, 79, 120, 78];
 let labelArr = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis"]
 const dayArray = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 const monthArray = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "Nopember", "Desember"]
+let today;
 
 const items = [
-    { id: 1, name: 'Keputih' },
-    { id: 2, name: 'Ketintang' },
+    { id: 1, name: 'Dharmahusada' },
+    { id: 2, name: 'Kenjeran' },
+    { id: 3, name: 'Keputih' },
+    { id: 4, name: 'Klampis' },
+    { id: 5, name: 'Manyar' },
+    { id: 6, name: 'Mulyosari' },
+    { id: 7, name: 'Ngagel' },
+    { id: 8, name: 'Rungkut' },
+    { id: 9, name: 'Semampir' },
+    { id: 10, name: 'Sutorejo' },
 ];
-
-let day = new Date().getDay();
-let date = new Date().getDate();
-let month = new Date().getMonth();
-month = monthArray[month]
-const year = new Date().getFullYear();
-console.log(month)
-
-if (date < 10) {
-    date = '0' + date;
-}
-
-if (month < 10) {
-    month = '0' + month;
-}
-
-let currentDay = dayArray[day];
-let today = date + ' ' + month + ' ' + year;
-let currentDate = date + '-' + month + '-' + year;
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -44,15 +36,52 @@ class Dashboard extends React.Component {
             date: '',
             ispu: null,
             location: null,
+            initialLocation: null
         }
     }
 
     componentDidMount() {
+        let day = new Date().getDay();
+        let date = new Date().getDate();
+        let month = new Date().getMonth();
+        month = monthArray[month]
+        const year = new Date().getFullYear();
+        console.log(month)
+
+        if (date < 10) {
+            date = '0' + date;
+        }
+
+        if (month < 10) {
+            month = '0' + month;
+        }
+
+        let currentDay = dayArray[day];
+        today = date + ' ' + month + ' ' + year;
+        let currentDate = date + '-' + month + '-' + year;
         this.setState({ day: currentDay, date: currentDate })
     }
 
     handlePlace(item) {
         console.log(item)
+        let location = item.name
+        // Fetching Data
+        firebase.database().ref('/' + location + '/data').on('value', (snap) => {
+            matkulOneArr = [];
+            snap.forEach((item) => {
+                let itemVal = item.val();
+                let itemKey = item.key;
+                // console.log(itemKey);
+                // console.log(itemVal);
+                Object.assign(itemVal, { key: itemKey })
+                matkulOneArr.push(itemVal);
+                // console.log(matkulOneArr);
+                this.setState({ matkulOne: matkulOneArr })
+            });
+        });
+
+
+        // Set State LatLong
     }
 
     render() {
