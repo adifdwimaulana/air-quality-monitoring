@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ScrollView, RefreshControl } from 'react-native';
 import { LineChart } from "react-native-chart-kit";
 import SearchableDropdown from 'react-native-searchable-dropdown';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Mapview from 'react-native-maps';
+import MapView from 'react-native-maps';
 import firebase from 'firebase';
 
 let dataArr = [88, 50, 79, 120, 78];
@@ -36,7 +36,9 @@ class Dashboard extends React.Component {
             date: '',
             ispu: null,
             location: null,
-            initialLocation: null
+            coordinate: null,
+            latlong: null,
+            refreshing: false,
         }
     }
 
@@ -62,136 +64,178 @@ class Dashboard extends React.Component {
         this.setState({ day: currentDay, date: currentDate })
     }
 
+    _onRefresh = () => {
+        this.setState({ refreshing: true });
+        firebase.database().ref('/').once('value', (snap) => {
+            let value = snap.val()
+        }).then(() => {
+            this.setState({ refreshing: false })
+        })
+    }
+
     handlePlace(item) {
         console.log(item)
-        let location = item.name
-        // Fetching Data
-        firebase.database().ref('/' + location + '/data').on('value', (snap) => {
-            matkulOneArr = [];
-            snap.forEach((item) => {
-                let itemVal = item.val();
-                let itemKey = item.key;
-                // console.log(itemKey);
-                // console.log(itemVal);
-                Object.assign(itemVal, { key: itemKey })
-                matkulOneArr.push(itemVal);
-                // console.log(matkulOneArr);
-                this.setState({ matkulOne: matkulOneArr })
-            });
-        });
+        let locationName = item.name
+        let locationId = item.id
+
+        firebase.database().ref('/' + locationName).on('value', (snap) => {
+            let latitude = snap.val().latitude
+            let longitude = snap.val().longitude
+
+            const location = {
+                latitude,
+                longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421
+            }
+
+            const locationWithoutDelta = {
+                latitude,
+                longitude
+            }
+
+            const region = Object.create(location)
+            const coordinate = Object.create(locationWithoutDelta)
+            this.setState({ latlong: region, coordinate, location: locationName })
+
+        })
 
 
-        // Set State LatLong
+
+
     }
 
     render() {
-        const { data, day, date, ispu, label } = this.state
+        const { data, day, date, ispu, label, location, latlong, coordinate, refreshing } = this.state
         console.log(day)
         console.log(date)
         return (
             <ScrollView
                 style={styles.container}
                 keyboardShouldPersistTaps='always'
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={this._onRefresh}
+                    />
+                }
             >
                 {/* <Text style={styles.title}>Bezier Line Chart</Text> */}
                 <Text style={styles.title}>Informasi Kualitas Udara</Text>
                 <Text style={styles.date}>{day}, {today}</Text>
-                <View style={styles.chartContainer}>
-                    <SearchableDropdown
-                        style={styles.searchForm}
-                        onTextChange={text => console.log(text)}
-                        onItemSelect={item => this.handlePlace(item)}
-                        textInputStyle={{
-                            borderBottomColor: "#000",
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                            marginHorizontal: 20
+                <SearchableDropdown
+                    style={styles.searchForm}
+                    onTextChange={text => console.log(text)}
+                    onItemSelect={item => this.handlePlace(item)}
+                    textInputStyle={{
+                        borderBottomColor: "#000",
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        marginHorizontal: 20
 
-                        }}
-                        itemStyle={styles.itemStyle}
-                        itemTextStyle={{
-                            color: '#222',
-                        }}
-                        items={items}
-                        defaultIndex={2}
-                        placeholder="Masukkan Lokasi"
-                        resetValue={false}
-                        underlineColorAndroid="transparent"
-                    />
-                    <View style={styles.indicatorWrapper}>
-                        <Text style={styles.ispu}>Index ISPU = 78</Text>
-                        <Text style={styles.status}>Status: Baik</Text>
-                    </View>
-                    <LineChart
-                        data={{
-                            labels: labelArr,
-                            datasets: [
-                                {
-                                    data: dataArr
+                    }}
+                    itemStyle={styles.itemStyle}
+                    itemTextStyle={{
+                        color: '#222',
+                    }}
+                    items={items}
+                    defaultIndex={0}
+                    placeholder="Masukkan Lokasi"
+                    resetValue={false}
+                    underlineColorAndroid="transparent"
+                />
+                {location ?
+                    <View>
+                        <View style={styles.mapContainer}>
+                            <MapView
+                                style={{
+                                    flex: 1, height: '100%', width: '100%', justifyContent: 'center', position: 'relative'
+                                }}
+                                region={latlong}
+                            >
+                                <MapView.Marker
+                                    coordinate={coordinate}
+                                    title={location}
+                                />
+                            </MapView>
+
+                        </View>
+                        <View style={styles.indicatorWrapper}>
+                            <Text style={styles.ispu}>Index ISPU = 78</Text>
+                            <Text style={styles.status}>Status: Baik</Text>
+                        </View>
+                        <LineChart
+                            data={{
+                                labels: labelArr,
+                                datasets: [
+                                    {
+                                        data: dataArr
+                                    }
+                                ]
+                            }}
+                            width={Dimensions.get("window").width * 0.94} // from react-native
+                            height={220}
+                            // yAxisLabel="$"
+                            // yAxisSuffix="k"
+                            yAxisInterval={1} // optional, defaults to 1
+                            chartConfig={{
+                                backgroundColor: "#094ab5",
+                                backgroundGradientFrom: "#1060e0",
+                                backgroundGradientTo: "#4a88ed",
+                                decimalPlaces: 0, // optional, defaults to 2dp
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                style: {
+                                    borderRadius: 16,
+                                },
+                                propsForDots: {
+                                    r: "6",
+                                    strokeWidth: "2",
+                                    stroke: "#094ab5"
                                 }
-                            ]
-                        }}
-                        width={Dimensions.get("window").width * 0.94} // from react-native
-                        height={220}
-                        // yAxisLabel="$"
-                        // yAxisSuffix="k"
-                        yAxisInterval={1} // optional, defaults to 1
-                        chartConfig={{
-                            backgroundColor: "#094ab5",
-                            backgroundGradientFrom: "#1060e0",
-                            backgroundGradientTo: "#4a88ed",
-                            decimalPlaces: 0, // optional, defaults to 2dp
-                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            style: {
-                                borderRadius: 16,
-                            },
-                            propsForDots: {
-                                r: "6",
-                                strokeWidth: "2",
-                                stroke: "#094ab5"
-                            }
-                        }}
-                        bezier
-                        style={styles.chart}
-                    />
-                </View>
-                <Text style={styles.pollen}>Pollen</Text>
-                <View style={styles.cardContainer}>
-                    <View style={styles.card}>
-                        <View style={styles.topPart}>
-                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                <View style={styles.valueWrapper}>
-                                    <Icon name='thermometer' size={22} color='#fff' style={styles.iconValue} />
-                                    <Text style={styles.value}>Temperature</Text>
+                            }}
+                            bezier
+                            style={styles.chart}
+                        />
+                        <Text style={styles.pollen}>Pollen</Text>
+                        <View style={styles.cardContainer}>
+                            <View style={styles.card}>
+                                <View style={styles.topPart}>
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <View style={styles.valueWrapper}>
+                                            <Icon name='thermometer' size={22} color='#fff' style={styles.iconValue} />
+                                            <Text style={styles.value}>Temperature</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>30C</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <View style={styles.valueWrapper}>
+                                            <Icon name='percent' size={22} color='#fff' style={styles.iconValue} />
+                                            <Text style={styles.value}>Humidity</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>80%</Text>
+                                    </View>
                                 </View>
-                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>30C</Text>
-                            </View>
-                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                <View style={styles.valueWrapper}>
-                                    <Icon name='percent' size={22} color='#fff' style={styles.iconValue} />
-                                    <Text style={styles.value}>Humidity</Text>
+                                <View style={styles.botPart}>
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <View style={styles.valueWrapper}>
+                                            <Icon name='cloud' size={22} color='#fff' style={styles.iconValue} />
+                                            <Text style={styles.value}>CO2</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>94 ppb</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                        <View style={styles.valueWrapper}>
+                                            <Icon name='fire' size={22} color='#fff' style={styles.iconValue} />
+                                            <Text style={styles.value}>Nitrogen</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>943 ppb</Text>
+                                    </View>
                                 </View>
-                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>80%</Text>
                             </View>
                         </View>
-                        <View style={styles.botPart}>
-                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                <View style={styles.valueWrapper}>
-                                    <Icon name='cloud' size={22} color='#fff' style={styles.iconValue} />
-                                    <Text style={styles.value}>CO2</Text>
-                                </View>
-                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>94 ppb</Text>
-                            </View>
-                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                                <View style={styles.valueWrapper}>
-                                    <Icon name='fire' size={22} color='#fff' style={styles.iconValue} />
-                                    <Text style={styles.value}>Nitrogen</Text>
-                                </View>
-                                <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>943 ppb</Text>
-                            </View>
-                        </View>
-                    </View>
-                </View>
+                    </View> : <Text style={{ color: '#bbb', fontSize: 32, fontWeight: '700', textAlign: 'center', marginTop: 100 }}>Input Location</Text>
+                }
+
             </ScrollView>
         )
     }
@@ -292,6 +336,18 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         // letterSpacing: 1.2,
         marginLeft: 6
+    },
+    mapContainer: {
+        marginTop: 8,
+        width: Dimensions.get("window").width * 0.94,
+        marginHorizontal: 'auto',
+        flexDirection: 'row',
+        marginLeft: Dimensions.get("window").width * 0.03,
+        height: 250,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        overflow: 'hidden',
     }
 })
 
