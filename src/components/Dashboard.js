@@ -6,8 +6,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView from 'react-native-maps';
 import firebase from 'firebase';
 
-let dataArr = [88, 50, 79, 120, 78];
-let labelArr = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis"]
+let dataArr = [];
+let labelArr = []
 const dayArray = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 const monthArray = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "Nopember", "Desember"]
 let today;
@@ -30,11 +30,9 @@ class Dashboard extends React.Component {
         super(props);
 
         this.state = {
-            data: null,
-            label: null,
+            data: '',
             day: '',
             date: '',
-            ispu: null,
             location: null,
             coordinate: null,
             latlong: null,
@@ -100,15 +98,42 @@ class Dashboard extends React.Component {
 
         })
 
+        // let ispuDay = new Date().getDay();
+        // let ispuDate = new Date().getDate();
+        // let ispuMonth = new Date().getMonth() + 1;
+        // // month = monthArray[month]
+        // const ispuYear = new Date().getFullYear();
+        // const ispuCurrentDate = ispuDate + '-' + ispuMonth + '-' + ispuYear;
+
+        // firebase.database().ref('/' + locationName + '/' + ispuCurrentDate).on('value', (snap) => {
+        //     console.log(snap.val())
+        // })
 
 
+        firebase.database().ref('/' + locationName + '/data').on('value', (snap) => {
+            let key;
+            let value;
+            dataArr = []
+            labelArr = []
+            snap.forEach((item) => {
+                key = item.key
+                value = item.val()
+                console.log(value.ispu)
+                dataArr.push(Number(value.ispu))
+                labelArr.push(value.day)
+            })
+            console.log(key)
+            console.log(value)
 
+            this.setState({ data: value })
+        })
     }
 
     render() {
-        const { data, day, date, ispu, label, location, latlong, coordinate, refreshing } = this.state
+        const { data, day, date, location, latlong, coordinate, refreshing } = this.state
         console.log(day)
         console.log(date)
+
         return (
             <ScrollView
                 style={styles.container}
@@ -157,10 +182,9 @@ class Dashboard extends React.Component {
                                     title={location}
                                 />
                             </MapView>
-
                         </View>
                         <View style={styles.indicatorWrapper}>
-                            <Text style={styles.ispu}>Index ISPU = 78</Text>
+                            <Text style={styles.ispu}>Index ISPU = {data.ispu}</Text>
                             <Text style={styles.status}>Status: Baik</Text>
                         </View>
                         <LineChart
@@ -205,14 +229,14 @@ class Dashboard extends React.Component {
                                             <Icon name='thermometer' size={22} color='#fff' style={styles.iconValue} />
                                             <Text style={styles.value}>Temperature</Text>
                                         </View>
-                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>30C</Text>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>{data.temperature} C</Text>
                                     </View>
                                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                                         <View style={styles.valueWrapper}>
                                             <Icon name='percent' size={22} color='#fff' style={styles.iconValue} />
                                             <Text style={styles.value}>Humidity</Text>
                                         </View>
-                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>80%</Text>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>{data.humidity} %</Text>
                                     </View>
                                 </View>
                                 <View style={styles.botPart}>
@@ -221,14 +245,14 @@ class Dashboard extends React.Component {
                                             <Icon name='cloud' size={22} color='#fff' style={styles.iconValue} />
                                             <Text style={styles.value}>CO2</Text>
                                         </View>
-                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>94 ppb</Text>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>{data.co2} ppb</Text>
                                     </View>
                                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                                         <View style={styles.valueWrapper}>
                                             <Icon name='fire' size={22} color='#fff' style={styles.iconValue} />
                                             <Text style={styles.value}>Nitrogen</Text>
                                         </View>
-                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>943 ppb</Text>
+                                        <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>{data.no2} ppb</Text>
                                     </View>
                                 </View>
                             </View>

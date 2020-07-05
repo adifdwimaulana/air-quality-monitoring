@@ -4,20 +4,34 @@ import SearchableDropdown from 'react-native-searchable-dropdown';
 import firebase from 'firebase';
 
 const locations = [
-    { id: 1, name: 'Keputih' },
-    { id: 2, name: 'Ketintang' },
+    { id: 1, name: 'Dharmahusada' },
+    { id: 2, name: 'Kenjeran' },
+    { id: 3, name: 'Keputih' },
+    { id: 4, name: 'Klampis' },
+    { id: 5, name: 'Manyar' },
+    { id: 6, name: 'Mulyosari' },
+    { id: 7, name: 'Ngagel' },
+    { id: 8, name: 'Rungkut' },
+    { id: 9, name: 'Semampir' },
+    { id: 10, name: 'Sutorejo' },
 ];
 
-const dayArr = ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"];
+const dayArray = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+let day = new Date().getDay();
+let date = new Date().getDate();
+let month = new Date().getMonth() + 1;
+// month = monthArray[month]
+const year = new Date().getFullYear();
+const currentDate = date + '-' + month + '-' + year;
+const currentDay = dayArray[day]
 
-let dosenArr = [];
 
 class Data extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            lokasi: null,
+            lokasi: '',
             co2: '',
             no2: '',
             temperature: '',
@@ -25,25 +39,20 @@ class Data extends React.Component {
         }
     }
 
-    handleSubmit(day, matkul, start, end, dosen, ruangan) {
-        let roomUrl = ruangan.id;
-        let roomName = ruangan.name;
-        let dayUrl = String(day);
-        dayUrl = dayUrl.toLowerCase();
-        console.log(dayUrl);
-
-        let url = '/' + roomUrl + '/matkul/' + dayUrl;
+    handleSubmit(lokasi, co2, no2, temperature, humidity) {
+        let url = '/' + lokasi + '/data';
         console.log(url);
 
         firebase.database().ref(url).push({
-            dosen,
-            nama: matkul,
-            start,
-            end,
-            ruangan: roomName
+            co2,
+            no2,
+            temperature,
+            humidity,
+            date: currentDate,
+            day: currentDay
         })
             .then(() => {
-                this.setState({ day: '', matkul: '', start: '', end: '', dosen: '', ruangan: '' })
+                this.setState({ co2: '', no2: '', temperature: '', humidity: '', lokasi: '' })
                 alert('Data berhasil di Tambahkan');
                 this.props.navigation.navigate('Data');
             })
@@ -51,12 +60,12 @@ class Data extends React.Component {
 
     handleLokasi(item) {
         console.log(item);
+        this.setState({ lokasi: item.name })
     }
 
     render() {
         const { navigation } = this.props;
-        const { day, matkul, start, end, dosen, ruangan, dosenList } = this.state;
-        console.log(dosenArr);
+        const { lokasi, co2, no2, temperature, humidity } = this.state;
         return (
             <ScrollView
                 keyboardShouldPersistTaps='always'
@@ -77,46 +86,46 @@ class Data extends React.Component {
                             color: '#222',
                         }}
                         items={locations}
-                        defaultIndex={2}
+                        defaultIndex={0}
                         placeholder="Masukkan Lokasi"
                         resetValue={false}
                         underlineColorAndroid="transparent"
                     />
-                    <Text style={styles.inputTitleCO2}>Kadar CO2</Text>
+                    <Text style={styles.inputTitleCO2}>Kadar CO</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="87 ppb"
-                        onChangeText={matkul => this.setState({ matkul })}
-                        value={matkul}
+                        placeholder="Dalam PPB"
+                        onChangeText={co2 => this.setState({ co2 })}
+                        value={co2}
                     />
                     <Text style={styles.inputTitle}>Kadar NO2</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="944 ppb"
-                        onChangeText={start => this.setState({ start })}
-                        value={start}
+                        placeholder="Dalam PPB"
+                        onChangeText={no2 => this.setState({ no2 })}
+                        value={no2}
                     />
                     <Text style={styles.inputTitle}>Suhu</Text>
                     <TextInput
                         style={styles.textInput}
                         autoCapitalize="none"
-                        placeholder="29"
-                        onChangeText={end => this.setState({ end })}
-                        value={end}
+                        placeholder="Dalam Celcius"
+                        onChangeText={temperature => this.setState({ temperature })}
+                        value={temperature}
                     />
                     <Text style={styles.inputTitle}>Kelembapan</Text>
                     <TextInput
                         style={styles.textInputKelembapan}
                         autoCapitalize="none"
-                        placeholder="77%"
-                        onChangeText={end => this.setState({ end })}
-                        value={end}
+                        placeholder="Dalam Persentase"
+                        onChangeText={humidity => this.setState({ humidity })}
+                        value={humidity}
                     />
                     <TouchableOpacity
                         style={styles.submitBtn}
-                        onPress={() => this.handleSubmit(day, matkul, start, end, dosen, ruangan)} >
+                        onPress={() => this.handleSubmit(lokasi, co2, no2, temperature, humidity)} >
                         <Text style={styles.submitText}>
                             Submit
                     </Text>
