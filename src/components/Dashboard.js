@@ -98,18 +98,6 @@ class Dashboard extends React.Component {
 
         })
 
-        // let ispuDay = new Date().getDay();
-        // let ispuDate = new Date().getDate();
-        // let ispuMonth = new Date().getMonth() + 1;
-        // // month = monthArray[month]
-        // const ispuYear = new Date().getFullYear();
-        // const ispuCurrentDate = ispuDate + '-' + ispuMonth + '-' + ispuYear;
-
-        // firebase.database().ref('/' + locationName + '/' + ispuCurrentDate).on('value', (snap) => {
-        //     console.log(snap.val())
-        // })
-
-
         firebase.database().ref('/' + locationName + '/data').on('value', (snap) => {
             let key;
             let value;
