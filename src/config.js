@@ -1,14 +1,14 @@
 import firebase from 'firebase';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBwpH3VmoUM8u-K5VqoILo1IAH8Q8mruQU",
-    authDomain: "air-quality-monitoring-46f28.firebaseapp.com",
-    databaseURL: "https://air-quality-monitoring-46f28.firebaseio.com",
-    projectId: "air-quality-monitoring-46f28",
-    storageBucket: "air-quality-monitoring-46f28.appspot.com",
-    messagingSenderId: "794593332188",
-    appId: "1:794593332188:web:4746b845511babd6ad1d19",
-    measurementId: "G-4SS9FDXR9M"
+    apiKey: "AIzaSyACH1lu3BwIWILUshbdPli8lD62c5YKjV8",
+    authDomain: "air-quality-monitoring-ispu.firebaseapp.com",
+    databaseURL: "https://air-quality-monitoring-ispu.firebaseio.com",
+    projectId: "air-quality-monitoring-ispu",
+    storageBucket: "air-quality-monitoring-ispu.appspot.com",
+    messagingSenderId: "934910939157",
+    appId: "1:934910939157:web:90e6fb2c337fd3e4dafe1c",
+    measurementId: "G-4MVKX6KMVG"
 };
 
 if (!firebase.apps.length) {
