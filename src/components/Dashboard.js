@@ -231,7 +231,7 @@ class Dashboard extends React.Component {
                                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                                         <View style={styles.valueWrapper}>
                                             <Icon name='cloud' size={22} color='#fff' style={styles.iconValue} />
-                                            <Text style={styles.value}>CO2</Text>
+                                            <Text style={styles.value}>CO</Text>
                                         </View>
                                         <Text style={{ fontSize: 32, color: '#fff', fontWeight: '700', textAlign: 'center' }}>{data.co2} ppb</Text>
                                     </View>
