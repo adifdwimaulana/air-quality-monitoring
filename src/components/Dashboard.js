@@ -173,7 +173,7 @@ class Dashboard extends React.Component {
                         </View>
                         <View style={styles.indicatorWrapper}>
                             <Text style={styles.ispu}>Index ISPU = {data.ispu}</Text>
-                            <Text style={styles.status}>Status: Baik</Text>
+                            <Text style={styles.status}>Status: {data.status}</Text>
                         </View>
                         <LineChart
                             data={{
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
         color: '#7c807c'
     },
     status: {
-        fontSize: 16,
+        fontSize: 12,
         color: '#73716b',
         fontWeight: '600',
         letterSpacing: 1.2
