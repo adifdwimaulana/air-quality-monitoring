@@ -36,6 +36,17 @@ class Data extends React.Component {
             no2: '',
             temperature: '',
             humidity: '',
+            tempError: null
+        }
+    }
+
+    tempValidation() {
+        console.log(this.state.temperature)
+        if (this.state.temperature <= 10) {
+            console.log("Suhu tidak boleh kurang dari 10 C")
+            this.setState({ tempError: "Suhu tidak boleh kurang dari 10 C" })
+        } else {
+            this.setState({ tempError: null })
         }
     }
 
@@ -110,11 +121,15 @@ class Data extends React.Component {
                     <Text style={styles.inputTitle}>Suhu</Text>
                     <TextInput
                         style={styles.textInput}
+                        onBlur={() => this.tempValidation()}
                         autoCapitalize="none"
                         placeholder="Dalam Celcius"
                         onChangeText={temperature => this.setState({ temperature })}
                         value={temperature}
                     />
+                    {
+                        this.state.tempError ? <Text style={{ fontSize: 16, color: 'red', marginTop: -15, marginBottom: 15 }}>{this.state.tempError}</Text> : null
+                    }
                     <Text style={styles.inputTitle}>Kelembapan</Text>
                     <TextInput
                         style={styles.textInputKelembapan}
